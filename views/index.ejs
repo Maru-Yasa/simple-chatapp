@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('cdn.ejs') %>  
+    <title>Simple Chat App</title>
+</head>
+<style>
+    #msg{
+        max-width: 1350px;
+        border: 1px solid grey;
+        margin-bottom: 10px;
+        overflow-y: scroll;
+        overflow-x: visible;
+        max-height: 150px;
+        height: 150px;
+    }
+    #ul-msg{
+        list-style: none;
+    }
+    #ul-msg li{
+        text-decoration: none;
+        margin-bottom: 5px;
+    }
+</style>
+<body>  
+    <center style="color: green;">
+        <h1 style="color: black;font-family: sans-serif;">Chat app g niat</h1>
+        <br>
+        <span id="online">1</span> online
+    </center>
+        <div>
+            <div id="msg">
+                <ul id="ul-msg">
+
+                </ul>
+            </div>
+            <div id="input-div">
+                <input type="text" id="input" placeholder="type massage here">
+                <button id="send">Send</button>
+            </div>
+        </div>
+
+    <script>
+        let msg = document.getElementById("ul-msg")
+        let input = document.getElementById("input")
+        let sendButton = document.getElementById("send")
+        var socket = io(window.location.href)
+        var name = prompt("tulis nama")
+        var onlineCount = document.getElementById('online')
+
+        socket.emit('setName',{name:name})
+        function createMsg(text,color){
+            let li = document.createElement('li')
+            li.innerHTML = text
+            li.style.color = color;
+            li.id = "ul-msg"
+            msg.appendChild(li)
+            li.focus()
+        }
+
+        socket.on("newConnection",(data) => {
+            createMsg(data.msg,"green")
+
+            onlineCount.innerText = data.count
+        })
+        sendButton.addEventListener('click',() => {
+            let msgData = {
+                msg:input.value,
+                sender:name
+            }
+            console.log(name)
+            socket.emit('msg',msgData)
+            createMsg( "you: "+ msgData.msg,"black")
+            input.value = ""
+
+        })
+
+        socket.on("msgBack",(data) => {
+
+            createMsg(`${data.sender} :` + data.msg,"black")
+
+        })
+
+        socket.on("disconnectedUser",(data) => {
+
+            createMsg(data.msg,"red")
+            onlineCount.innerText = data.count
+
+        })
+    </script>
+
+
+</body>
+</html>
