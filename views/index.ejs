@@ -5,9 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%- include('cdn.ejs') %>  
-    <title>Simple Chat App</title>
+    <title>Simple Chat App </title>
 </head>
 <style>
+        html, body {
+    height: 100%;
+    }
+
+    .full-height {
+    height: 100%;
+    }
+
+
     #msg{
         max-width: 1350px;
         border: 1px solid grey;
@@ -17,6 +26,15 @@
         max-height: 150px;
         height: 150px;
     }
+    #user{
+        max-width: 1350px;
+        border: 1px solid grey;
+        margin-bottom: 10px;
+        overflow-y: scroll;
+        overflow-x: visible;
+        max-height: 150px;
+        height: 100px;
+    }
     #ul-msg{
         list-style: none;
     }
@@ -24,31 +42,50 @@
         text-decoration: none;
         margin-bottom: 5px;
     }
+    #ul-user li{
+        text-decoration: none;
+        margin-bottom: 5px;
+    }
+
+    body{
+        max-height: 100%;
+    }
 </style>
 <body>  
-    <center style="color: green;">
-        <h1 style="color: black;font-family: sans-serif;">Chat app g niat</h1>
-        <br>
+    <center style="" class="text-success container">
+        <h1 style="color: black;" class="fw-bold">Public Socket based chat APP</h1>
         <span id="online">1</span> online
     </center>
-        <div>
+
+        <div class="container">
             <div id="msg">
                 <ul id="ul-msg">
-
+                    <% data.forEach(e => { %>
+                        <li class="" style="color: black;">
+                            <%= e.sender %> : <%= e.msg %>  
+                        </li>
+                    <% }) %>
                 </ul>
             </div>
             <div id="input-div">
-                <input type="text" id="input" placeholder="type massage here">
-                <button id="send">Send</button>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="input" placeholder="type massage here">
+                    <button id="send" class="btn btn-primary">Send</button>
+                </div>
             </div>
         </div>
 
+  
+
     <script>
         let msg = document.getElementById("ul-msg")
+        let user = document.getElementById("ul-user")
         let input = document.getElementById("input")
         let sendButton = document.getElementById("send")
         var socket = io(window.location.href)
-        var name = prompt("tulis nama")
+        // var name = prompt("tulis nama")
+        var name = ""
+        var clients;
         var onlineCount = document.getElementById('online')
 
         socket.emit('setName',{name:name})
@@ -60,6 +97,22 @@
             msg.appendChild(li)
             li.focus()
         }
+        function createUserList(text,color){
+            let li = document.createElement('li')
+            li.innerHTML = text
+            li.style.color = color;
+            li.id = "ul-user"
+            user.appendChild(li)
+            li.focus()
+        }
+
+        socket.on('clients', (data) => {
+            clients = data.clients
+            clients.forEach(e => {
+                createUserList(e,"black")
+            });
+        })
+
 
         socket.on("newConnection",(data) => {
             createMsg(data.msg,"green")
@@ -75,7 +128,6 @@
             socket.emit('msg',msgData)
             createMsg( "you: "+ msgData.msg,"black")
             input.value = ""
-
         })
 
         socket.on("msgBack",(data) => {
