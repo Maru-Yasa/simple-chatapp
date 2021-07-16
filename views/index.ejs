@@ -60,11 +60,13 @@
         <div class="container">
             <div id="msg">
                 <ul id="ul-msg">
-                    <% data.forEach(e => { %>
-                        <li class="" style="color: black;">
-                            <%= e.sender %> : <%= e.msg %>  
-                        </li>
-                    <% }) %>
+                    <% if (condition) { %>
+                        <% data.forEach(e => { %>
+                            <li class="" style="color: black;">
+                                <%= e.sender %> : <%= e.msg %>  
+                            </li>
+                        <% }) %>
+                    <% } %>
                 </ul>
             </div>
             <div id="input-div">
